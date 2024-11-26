@@ -9,15 +9,18 @@ from .models import *
 def store(request):
 
     if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
+        if request.user.is_superuser:
+            customer = request.user.customer
+            order, created = Order.objects.get_or_create(customer=customer, complete=False)
+            items = order.orderitem_set.all()
+            cartItems = order.get_cart_items
+            print(f"Welcome, superuser {request.user.username}")
     else:
         #Create empty cart for now for none-logged in users
         items = []
         order = {'get_cart_total':0, 'get_cart_items':0}
         cartItems = order['get_cart_items']
+        print("User is not logged in")
         
 
     
@@ -89,5 +92,9 @@ def updateItem(request):
         orderItem.delete()
 
     return JsonResponse('Item was added', safe=False)
+
+def processOrder(request):
+    print('Data:', request.body)
+    return JsonResponse('Payment subbmitted..', safe=False)
 
 
